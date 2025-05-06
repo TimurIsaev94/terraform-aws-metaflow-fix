@@ -24,5 +24,5 @@ locals {
 
   # RDS PostgreSQL >= 15 requires SSL by default
   # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Concepts.General.SSL.html#PostgreSQL.Concepts.General.SSL.Requiring
-  database_ssl_mode = tonumber(split(".", var.db_engine_version)[0]) >= 15 ? "require" : "disable"
+  database_ssl_mode = tonumber(split(".", var.db_engine_version)[0]) >= 15 ? "prefer" : "disable"
 }

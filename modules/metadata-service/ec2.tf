@@ -3,35 +3,11 @@ resource "aws_security_group" "metadata_service_security_group" {
   description = "Security Group for Fargate which runs the Metadata Service."
   vpc_id      = var.metaflow_vpc_id
 
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = var.vpc_cidr_blocks
-    description = "Allow API calls internally"
-  }
-
-  ingress {
-    from_port   = 8082
-    to_port     = 8082
-    protocol    = "tcp"
-    cidr_blocks = var.vpc_cidr_blocks
-    description = "Allow API calls internally"
-  }
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    self        = true
-    description = "Internal communication"
-  }
-
-  # egress to anywhere
+  # Remove all inline ingress rules here.
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1" # all
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
     description = "Allow all external communication"
   }
@@ -42,6 +18,40 @@ resource "aws_security_group" "metadata_service_security_group" {
       Metaflow = "true"
     }
   )
+}
+
+# Now define ingress rules separately:
+resource "aws_security_group_rule" "allow_8080" {
+  security_group_id = aws_security_group.metadata_service_security_group.id
+
+  type        = "ingress"
+  from_port   = 8080
+  to_port     = 8080
+  protocol    = "tcp"
+  cidr_blocks = var.vpc_cidr_blocks
+  description = "Allow API calls internally"
+}
+
+resource "aws_security_group_rule" "allow_8082" {
+  security_group_id = aws_security_group.metadata_service_security_group.id
+
+  type        = "ingress"
+  from_port   = 8082
+  to_port     = 8082
+  protocol    = "tcp"
+  cidr_blocks = var.vpc_cidr_blocks
+  description = "Allow API calls internally"
+}
+
+resource "aws_security_group_rule" "allow_self" {
+  security_group_id = aws_security_group.metadata_service_security_group.id
+
+  type        = "ingress"
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  self        = true
+  description = "Internal communication"
 }
 
 resource "aws_lb" "this" {

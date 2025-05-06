@@ -1,4 +1,4 @@
-resource "aws_batch_compute_environment" "this" {
+resource "aws_batch_compute_environment" "metaflow_default_compute_environment" {
   /* Unique name for compute environment.
      We use compute_environment_name_prefix opposed to just compute_environment_name as batch compute environments must
      be created and destroyed, never edited. This way when we go to make a "modification" we will stand up a new
@@ -75,13 +75,15 @@ resource "aws_batch_compute_environment" "this" {
   }
 }
 
-resource "aws_batch_job_queue" "this" {
+resource "aws_batch_job_queue" "metaflow_default_queue" {
   name     = local.batch_queue_name
   state    = "ENABLED"
   priority = 1
-  compute_environments = [
-    aws_batch_compute_environment.this.arn
-  ]
+
+  compute_environment_order {
+      compute_environment = aws_batch_compute_environment.metaflow_default_compute_environment.arn
+      order               = 1
+  }
 
   tags = var.standard_tags
 }

@@ -1,10 +1,10 @@
 output "METAFLOW_DATATOOLS_S3ROOT" {
-  value       = "s3://${aws_s3_bucket.this.bucket}/data"
+  value       = "s3://${aws_s3_bucket.metaflow_bucket.bucket}/data"
   description = "Amazon S3 URL for Metaflow DataTools"
 }
 
 output "METAFLOW_DATASTORE_SYSROOT_S3" {
-  value       = "s3://${aws_s3_bucket.this.bucket}/metaflow"
+  value       = "s3://${aws_s3_bucket.metaflow_bucket.bucket}/metaflow"
   description = "Amazon S3 URL for Metaflow DataStore"
 }
 
@@ -34,11 +34,11 @@ output "rds_master_instance_endpoint" {
 }
 
 output "s3_bucket_arn" {
-  value       = aws_s3_bucket.this.arn
+  value       = aws_s3_bucket.metaflow_bucket.arn
   description = "The ARN of the bucket we'll be using as blob storage"
 }
 
 output "s3_bucket_name" {
-  value       = aws_s3_bucket.this.bucket
+  value       = aws_s3_bucket.metaflow_bucket.bucket
   description = "The name of the bucket we'll be using as blob storage"
 }
