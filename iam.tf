@@ -96,7 +96,7 @@ data "aws_iam_policy_document" "deny_presigned_batch" {
   }
 }
 
-data "aws_iam_policy_document" "allow_sagemaker" {
+/* data "aws_iam_policy_document" "allow_sagemaker" {
   statement {
     sid = "AllowSagemakerCreate"
     actions = [
@@ -142,7 +142,59 @@ data "aws_iam_policy_document" "allow_sagemaker" {
       "arn:${var.iam_partition}:sagemaker:${local.aws_region}:${local.aws_account_id}:endpoint-config/*",
     ]
   }
+} */
+
+locals {
+  sagemaker_arn_prefix = "arn:${data.aws_partition.current.partition}:sagemaker:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}"
 }
+
+###############################################################################
+# IAM POLICY DOCUMENT
+###############################################################################
+data "aws_iam_policy_document" "allow_sagemaker" {
+  dynamic "statement" {
+    for_each = {
+      Create   = ["sagemaker:CreateTrainingJob"]
+      Describe = ["sagemaker:DescribeTrainingJob"]
+    }
+    content {
+      sid     = "AllowSagemaker${statement.key}"
+      effect  = "Allow"
+      actions = statement.value
+      resources = [
+        "${local.sagemaker_arn_prefix}:training-job/*"
+      ]
+    }
+  }
+
+  statement {
+    sid     = "AllowSagemakerDeploy"
+    effect  = "Allow"
+    actions = [
+      "sagemaker:CreateModel",
+      "sagemaker:CreateEndpointConfig",
+      "sagemaker:CreateEndpoint",
+      "sagemaker:DescribeModel",
+      "sagemaker:DescribeEndpoint",
+      "sagemaker:InvokeEndpoint",
+    ]
+    resources = [
+      "${local.sagemaker_arn_prefix}:endpoint/*",
+      "${local.sagemaker_arn_prefix}:model/*",
+      "${local.sagemaker_arn_prefix}:endpoint-config/*",
+    ]
+  }
+}
+
+###############################################################################
+# MANAGED POLICY RESOURCE
+###############################################################################
+resource "aws_iam_policy" "allow_sagemaker" {
+  name        = "AllowSagemaker"
+  description = "Create, describe, and deploy SageMaker training jobs & endpoints"
+  policy      = data.aws_iam_policy_document.allow_sagemaker.json
+}
+
 
 data "aws_iam_policy_document" "iam_pass_role" {
   statement {
@@ -201,13 +253,13 @@ data "aws_iam_policy_document" "cloudwatch" {
 }
 
 resource "aws_iam_role_policy" "grant_custom_s3_list_batch" {
-  name   = "s3_list"
+  name   = "CustomS3ListBatch"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.custom_s3_list_batch.json
 }
 
 resource "aws_iam_role_policy" "grant_custom_s3_batch" {
-  name   = "custom_s3"
+  name   = "CustomS3Batch"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.custom_s3_batch.json
 }
@@ -219,7 +271,7 @@ resource "aws_iam_role_policy" "grant_s3_kms" {
 }
 
 resource "aws_iam_role_policy" "grant_deny_presigned_batch" {
-  name   = "deny_presigned"
+  name   = "DenyPresignedBatch"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.deny_presigned_batch.json
 }
@@ -231,20 +283,20 @@ resource "aws_iam_role_policy" "grant_allow_sagemaker" {
 }
 
 resource "aws_iam_role_policy" "grant_iam_pass_role" {
-  name   = "iam_pass_role"
+  name   = "IAM_PASS_ROLE"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.iam_pass_role.json
 }
 
 resource "aws_iam_role_policy" "grant_dynamodb" {
   count  = var.enable_step_functions ? 1 : 0
-  name   = "dynamodb"
+  name   = "DynamoDB"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.dynamodb.json
 }
 
 resource "aws_iam_role_policy" "grant_cloudwatch" {
-  name   = "cloudwatch"
+  name   = "Cloudwatch"
   role   = aws_iam_role.batch_s3_task_role.name
   policy = data.aws_iam_policy_document.cloudwatch.json
 }

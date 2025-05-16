@@ -1,37 +1,56 @@
-data "aws_iam_policy_document" "ecs_instance_role_assume_role" {
+###############################################################################
+# TRUST POLICY (EC2 instances assume the role)
+###############################################################################
+data "aws_iam_policy_document" "ecs_instance_trust" {
   statement {
-    actions = [
-      "sts:AssumeRole"
-    ]
-
-    effect = "Allow"
+    sid     = "EC2AssumeRole"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
 
     principals {
-      identifiers = [
-        "ec2.amazonaws.com"
-      ]
-      type = "Service"
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
     }
   }
 }
 
-resource "aws_iam_role" "ecs_instance_role" {
-  name = local.ecs_instance_role_name
-  # Learn more by reading this Terraform documentation https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/batch_compute_environment#argument-reference
-  # Learn more by reading this AWS Batch documentation https://docs.aws.amazon.com/batch/latest/userguide/service_IAM_role.html
-  description = "This role is passed to AWS Batch as a `instance_role`. This allows our Metaflow Batch jobs to execute with proper permissions."
+###############################################################################
+# IAM ROLE FOR ECS CONTAINER INSTANCES
+###############################################################################
+resource "aws_iam_role" "ecs_instance" {
+  name               = local.ecs_instance_role_name
+  description        = "Instance role passed to AWS Batch compute environments"
+  assume_role_policy = data.aws_iam_policy_document.ecs_instance_trust.json
 
-  assume_role_policy = data.aws_iam_policy_document.ecs_instance_role_assume_role.json
+  tags = var.standard_tags
 }
 
-/*
- Attach policy AmazonEC2ContainerServiceforEC2Role to ecs_instance_role. The
- policy is what the role is allowed to do similar to rwx for a user.
- AmazonEC2ContainerServiceforEC2Role is a predefined set of permissions by aws the
- permissions given are at:
- https://docs.aws.amazon.com/AmazonECS/latest/developerguide/instance_IAM_role.html
-*/
-resource "aws_iam_role_policy_attachment" "ecs_instance_role" {
-  role       = aws_iam_role.ecs_instance_role.name
-  policy_arn = "arn:${var.iam_partition}:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+###############################################################################
+# ATTACH THE AWS‑MANAGED POLICIES
+###############################################################################
+data "aws_iam_policy" "ecs_EC2ContainerServiceforEC2Role" {
+  name = "AmazonEC2ContainerServiceforEC2Role"
+}
+
+data "aws_iam_policy" "ecs_EC2ReadOnlyAccess" {
+  name = "AmazonEC2ReadOnlyAccess"
+}
+
+data "aws_iam_policy" "ecs_CloudWatchAgentServerPolicy" {
+  name = "CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_EC2ContainerServiceforEC2Role" {
+  role       = aws_iam_role.ecs_instance.name
+  policy_arn = data.aws_iam_policy.ecs_EC2ContainerServiceforEC2Role.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_EC2ReadOnlyAccess" {
+  role       = aws_iam_role.ecs_instance.name
+  policy_arn = data.aws_iam_policy.ecs_EC2ReadOnlyAccess.arn
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_CloudWatchAgentServerPolicy" {
+  role       = aws_iam_role.ecs_instance.name
+  policy_arn = data.aws_iam_policy.ecs_CloudWatchAgentServerPolicy.arn
 }

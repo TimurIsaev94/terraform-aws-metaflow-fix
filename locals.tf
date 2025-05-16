@@ -9,7 +9,7 @@ locals {
   aws_region     = data.aws_region.current.name
   aws_account_id = data.aws_caller_identity.current.account_id
 
-  batch_s3_task_role_name   = "${local.resource_prefix}batch_s3_task_role${local.resource_suffix}"
+  batch_s3_task_role_name   = "${local.resource_prefix}BatchS3TaskRole${local.resource_suffix}"
   metaflow_batch_image_name = "${local.resource_prefix}batch${local.resource_suffix}"
   metadata_service_container_image = (
     var.metadata_service_container_image == "" ?

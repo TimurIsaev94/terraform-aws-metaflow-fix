@@ -46,7 +46,7 @@ resource "aws_launch_template" "cpu" {
 */
 resource "aws_iam_instance_profile" "ecs_instance_role" {
   name = local.ecs_instance_role_name
-  role = aws_iam_role.ecs_instance_role.name
+  role = aws_iam_role.ecs_instance.name
 }
 
 resource "aws_security_group" "this" {
@@ -60,11 +60,20 @@ resource "aws_security_group" "this" {
     cidr_blocks = var.compute_environment_egress_cidr_blocks
   }
 
+  # IPv6 egress – allow all outbound traffic
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    ipv6_cidr_blocks = ["::/0"]
+    description      = "Allow all outbound IPv6 traffic"
+  }
+
   ingress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     self        = true
-    description = "internal traffic"
+    description = "Allow all inbound traffic from within the Security Group"
   }
 }

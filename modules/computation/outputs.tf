@@ -14,7 +14,7 @@ output "ecs_execution_role_arn" {
 }
 
 output "ecs_instance_role_arn" {
-  value       = aws_iam_role.ecs_instance_role.arn
+  value       = aws_iam_role.ecs_instance.arn
   description = "This role will be granted access to our S3 Bucket which acts as our blob storage."
 }
 

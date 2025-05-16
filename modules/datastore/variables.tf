@@ -71,3 +71,15 @@ variable "enable_key_rotation" {
   description = "Enable key rotation for KMS keys"
   default     = false
 }
+
+variable "kms_admin_arns" {
+  description = "Principals allowed to administer the KMS key"
+  type        = list(string)
+  default     = []
+}
+
+variable "kms_usage_arns" {
+  description = "Principals allowed to use (encrypt/decrypt) the KMS key"
+  type        = list(string)
+  default     = []
+}
