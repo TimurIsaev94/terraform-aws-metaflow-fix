@@ -10,7 +10,7 @@ locals {
   )
 }
 
-data "aws_iam_policy_document" "kms_key_policy" {
+/* data "aws_iam_policy_document" "kms_key_policy" {
   # Allow admin full control
   statement {
     sid    = "AllowKeyAdmins"
@@ -39,6 +39,40 @@ data "aws_iam_policy_document" "kms_key_policy" {
       "kms:DescribeKey"
     ]
     resources = ["*"]
+  }
+} */
+
+data "aws_iam_policy_document" "kms_key_policy" {
+  # Allow admin full control
+  statement {
+    sid    = "AllowKeyAdmins"
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = local.effective_kms_admin_arns
+    }
+    actions   = ["kms:*"]
+    resources = ["*"]
+  }
+
+  dynamic "statement" {
+    for_each = length(var.kms_usage_arns) > 0 ? [1] : []
+    content {
+      sid    = "AllowKeyUsage"
+      effect = "Allow"
+      principals {
+        type        = "AWS"
+        identifiers = var.kms_usage_arns
+      }
+      actions = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ]
+      resources = ["*"]
+    }
   }
 }
 
