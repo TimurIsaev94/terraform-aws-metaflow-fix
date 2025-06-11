@@ -143,3 +143,8 @@ output "ecs_execution_role_arn" {
   value       = module.metaflow-computation.batch_compute_execution_role
   description = "This role is passed to AWS Batch as a `service_role`. This allows AWS Batch to make calls to other AWS services on our behalf."
 }
+
+output "ecs_instance_profile_arn" {
+  value       = module.metaflow-computation.ecs_instance_profile_arn
+  description = "The ARN of the IAM instance profile for ECS instances"
+}
