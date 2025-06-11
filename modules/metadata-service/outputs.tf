@@ -19,7 +19,7 @@ output "api_gateway_rest_api_id_key_id" {
 }
 
 output "api_key_value" {
-  value = aws_api_gateway_api_key.this.value
+  value = aws_api_gateway_api_key.this[0].value
   description = "API Key value for Metadata Service. Fetch Key from AWS Console [METAFLOW_SERVICE_AUTH_KEY]"
   sensitive = true
 }
