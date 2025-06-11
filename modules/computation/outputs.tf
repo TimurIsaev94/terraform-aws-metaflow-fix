@@ -27,3 +27,8 @@ output "batch_compute_environment_security_group_id" {
   value       = aws_security_group.this.id
   description = "The ID of the security group attached to the Batch Compute environment."
 }
+
+output "batch_compute_execution_role" {
+  value       = aws_iam_role.batch_execution_role.arn
+  description = "This role is passed to AWS Batch as a `service_role`. This allows AWS Batch to make calls to other AWS services on our behalf."
+}
