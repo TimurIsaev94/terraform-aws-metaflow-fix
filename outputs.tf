@@ -128,3 +128,8 @@ output "batch_compute_environment_security_group_id" {
   value       = module.metaflow-computation.batch_compute_environment_security_group_id
   description = "The ID of the security group attached to the Batch Compute environment."
 }
+
+output "ecs_instance_role_arn" {
+  value       = module.metaflow-computation.ecs_instance_role_arn
+  description = "This role will be granted access to our S3 Bucket which acts as our blob storage."
+}
