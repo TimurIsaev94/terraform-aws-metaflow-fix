@@ -60,7 +60,7 @@ data "aws_iam_policy_document" "kms_key_policy" {
       effect = "Allow"
       principals {
         type        = "AWS"
-        identifiers = var.ecs_s3_access_iam_role
+        identifiers = [var.ecs_s3_access_iam_role]
       }
       actions = [
         "kms:Encrypt",
