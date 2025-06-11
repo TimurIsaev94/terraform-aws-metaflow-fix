@@ -154,3 +154,7 @@ output "ecs_instance_profile_arn" {
   value       = module.metaflow-computation.ecs_instance_profile_arn
   description = "The ARN of the IAM instance profile for ECS instances"
 }
+
+output "secrets_manager_metaflow_config_arn" {
+    value = aws_secretsmanager_secret_version.metaflow_config_value.arn
+}
