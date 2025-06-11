@@ -16,6 +16,7 @@ module "metaflow-datastore" {
   db_engine_version = var.db_engine_version
 
   standard_tags = var.tags
+  kms_usage_arns = var.kms_usage_arns
 }
 
 module "metaflow-metadata-service" {
