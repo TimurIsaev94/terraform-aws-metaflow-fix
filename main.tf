@@ -118,3 +118,51 @@ module "metaflow-step-functions" {
 
   standard_tags = var.tags
 }
+
+####
+#
+####
+
+locals {
+  metaflow_profile_json = jsonencode(
+    merge(
+      var.enable_custom_batch_container_registry ? {
+        "METAFLOW_BATCH_CONTAINER_REGISTRY" = element(split("/", aws_ecr_repository.metaflow_batch_image[0].repository_url), 0),
+        "METAFLOW_BATCH_CONTAINER_IMAGE"    = element(split("/", aws_ecr_repository.metaflow_batch_image[0].repository_url), 1)
+      } : {},
+      var.metadata_service_enable_api_basic_auth ? {
+        "METAFLOW_SERVICE_AUTH_KEY" = "${module.metaflow-metadata-service.api_key_value}"
+      } : {},
+      var.batch_type == "fargate" ? {
+        "METAFLOW_ECS_FARGATE_EXECUTION_ROLE" = module.metaflow-computation.ecs_execution_role_arn
+      } : {},
+      {
+        "METAFLOW_DATASTORE_SYSROOT_S3"       = module.metaflow-datastore.METAFLOW_DATASTORE_SYSROOT_S3,
+        "METAFLOW_DATATOOLS_S3ROOT"           = module.metaflow-datastore.METAFLOW_DATATOOLS_S3ROOT,
+        "METAFLOW_BATCH_JOB_QUEUE"            = module.metaflow-computation.METAFLOW_BATCH_JOB_QUEUE,
+        "METAFLOW_ECS_S3_ACCESS_IAM_ROLE"     = aws_iam_role.batch_s3_task_role.arn,
+        "METAFLOW_SERVICE_URL"                = module.metaflow-metadata-service.METAFLOW_SERVICE_URL,
+        "METAFLOW_SERVICE_INTERNAL_URL"       = module.metaflow-metadata-service.METAFLOW_SERVICE_INTERNAL_URL,
+        "METAFLOW_SFN_IAM_ROLE"               = module.metaflow-step-functions.metaflow_step_functions_role_arn,
+        "METAFLOW_SFN_STATE_MACHINE_PREFIX"   = replace("${local.resource_prefix}${local.resource_suffix}", "--", "-"),
+        "METAFLOW_EVENTS_SFN_ACCESS_IAM_ROLE" = module.metaflow-step-functions.metaflow_eventbridge_role_arn,
+        "METAFLOW_SFN_DYNAMO_DB_TABLE"        = module.metaflow-step-functions.metaflow_step_functions_dynamodb_table_name,
+        "METAFLOW_DEFAULT_DATASTORE"          = "s3",
+        "METAFLOW_DEFAULT_METADATA"           = "service"
+      }
+    )
+  )
+}
+
+resource "aws_secretsmanager_secret" "metaflow_config" {
+  name = "metaflow-config"
+}
+
+resource "aws_secretsmanager_secret_version" "metaflow_config_value" {
+  secret_id     = aws_secretsmanager_secret.metaflow_config.id
+  secret_string = local.metaflow_profile_json
+}
+
+####
+# END
+#### 
