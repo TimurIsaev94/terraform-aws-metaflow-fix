@@ -18,6 +18,11 @@ output "ecs_instance_role_arn" {
   description = "This role will be granted access to our S3 Bucket which acts as our blob storage."
 }
 
+output "ecs_instance_role_name" {
+  value       = aws_iam_role.ecs_instance.name
+  description = "The Name of the IAM role for ECS instances."
+}
+
 output "batch_compute_environment_security_group_id" {
   value       = aws_security_group.this.id
   description = "The ID of the security group attached to the Batch Compute environment."

@@ -133,3 +133,8 @@ output "ecs_instance_role_arn" {
   value       = module.metaflow-computation.ecs_instance_role_arn
   description = "This role will be granted access to our S3 Bucket which acts as our blob storage."
 }
+
+output "ecs_instance_role_name" {
+  value       = module.metaflow-computation.ecs_instance_role_name
+  description = "The Name of the IAM role for ECS instances."
+}
