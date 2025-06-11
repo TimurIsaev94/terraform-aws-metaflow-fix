@@ -72,6 +72,12 @@ data "aws_iam_policy_document" "kms_key_policy" {
         "kms:DescribeKey"
       ]
       resources = ["*"]
+
+      condition {
+        test     = "StringEquals"
+        variable = "kms:ViaService"
+        values   = ["s3.${data.aws_region.current.name}.amazonaws.com"]
+      }
     }
   }
 }
