@@ -55,6 +55,29 @@ data "aws_iam_policy_document" "kms_key_policy" {
     resources = ["*"]
   }
 
+  statement {
+      sid    = "AllowKeyUsageForMetaflowBatchJobs"
+      effect = "Allow"
+      principals {
+        type        = "AWS"
+        identifiers = var.ecs_s3_access_iam_role
+      }
+      actions = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ]
+      resources = ["*"]
+
+      condition {
+        test     = "StringEquals"
+        variable = "kms:ViaService"
+        values   = ["s3.${data.aws_region.current.name}.amazonaws.com"]
+      }
+  }
+
   dynamic "statement" {
     for_each = length(var.kms_usage_arns) > 0 ? [1] : []
     content {

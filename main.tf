@@ -17,6 +17,7 @@ module "metaflow-datastore" {
 
   standard_tags = var.tags
   kms_usage_arns = var.kms_usage_arns
+  ecs_s3_access_iam_role = aws_iam_role.batch_s3_task_role.arn
 }
 
 module "metaflow-metadata-service" {

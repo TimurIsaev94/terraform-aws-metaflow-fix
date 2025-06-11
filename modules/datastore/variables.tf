@@ -83,3 +83,8 @@ variable "kms_usage_arns" {
   type        = list(string)
   default     = []
 }
+
+variable "ecs_s3_access_iam_role" {
+  description = "ECS S3 role used by metaflow to use (encrypt/decrypt) the S3 KMS key"
+  type        = string
+}
