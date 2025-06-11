@@ -48,6 +48,12 @@ output "api_gateway_rest_api_id_key_id" {
   description = "API Gateway Key ID for Metadata Service. Fetch Key from AWS Console [METAFLOW_SERVICE_AUTH_KEY]"
 }
 
+output "api_key_value" {
+  value = module.metaflow-metadata-service.api_key_value
+  description = "API Key value for Metadata Service. Fetch Key from AWS Console [METAFLOW_SERVICE_AUTH_KEY]"
+  sensitive = true
+}
+
 output "datastore_s3_bucket_kms_key_arn" {
   value       = module.metaflow-datastore.datastore_s3_bucket_kms_key_arn
   description = "The ARN of the KMS key used to encrypt the Metaflow datastore S3 bucket"
