@@ -1,6 +1,8 @@
 module "metaflow-datastore" {
   source = "./modules/datastore"
 
+  aws_region = var.aws_region
+
   force_destroy_s3_bucket = var.force_destroy_s3_bucket
   enable_key_rotation     = var.enable_key_rotation
 
